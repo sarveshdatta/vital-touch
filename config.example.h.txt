@@ -1,0 +1,18 @@
+// Copy this file to config.h (same folder) and fill in your values.
+// config.h is git-ignored so WiFi passwords and keys never reach GitHub.
+#pragma once
+
+#define WIFI_SSID      "your-wifi-name"
+#define WIFI_PASSWORD  "your-wifi-password"
+
+// Address of the laptop/server running backend/app.py, on the same network.
+// Find the laptop IP with `ip a` (Linux) or `ipconfig` (Windows).
+#define BACKEND_URL    "http://192.168.1.10:5000"
+
+// Must match VT_DEVICE_API_KEY in backend/.env
+#define DEVICE_API_KEY "change-this-device-key"
+
+#define DEVICE_ID      "ESP32_01"
+
+// Set to 1 if an MLX90614 IR temperature sensor is wired on the same I2C bus.
+#define USE_MLX90614   0

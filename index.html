@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vital touch | IoT Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* Japanese Minimalist Palette Setup */
+        :root {
+            --bg-color: #F4F4F6; /* Gofun - Chalk White */
+            --text-main: #2B2B2B; /* Sumi - Ink Black */
+            --accent-blue: #3E5C76; /* Indigo Dye */
+            --accent-green: #6A8E7F; /* Muted Bamboo */
+            --danger: #C05746; /* Vermilion */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Smooth Transitions */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Heartbeat Animation */
+        @keyframes heart-pulse {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.25); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.15); }
+            60% { transform: scale(1); }
+            100% { transform: scale(1); }
+        }
+
+        .heartbeat-icon {
+            animation: heart-pulse 1.5s infinite ease-in-out;
+            display: inline-block;
+        }
+
+        /* Glassmorphism Card Style */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border-radius: 12px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .btn-luxury {
+            transition: all 0.3s ease;
+        }
+        .btn-luxury:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Emergency Button Pulse */
+        @keyframes sos-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        
+        .btn-emergency {
+            animation: sos-pulse 2s infinite;
+        }
+
+        /* Excel-like Table Styles */
+        .spreadsheet-container {
+            border: 1px solid #d1d5db;
+            background: white;
+            overflow: auto;
+            max-height: 80vh;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .spreadsheet-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+        }
+        .spreadsheet-table th, .spreadsheet-table td {
+            border: 1px solid #d1d5db;
+            padding: 4px 8px;
+            white-space: nowrap;
+            transition: padding 0.2s, font-size 0.2s, background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+        .spreadsheet-table th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            text-align: center;
+            color: #374151;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .spreadsheet-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .spreadsheet-table tr:hover {
+            background-color: #e5e7eb;
+            cursor: cell;
+        }
+
+        /* COMPACT MODE STYLES */
+        .spreadsheet-table.compact-view th, 
+        .spreadsheet-table.compact-view td {
+            padding: 1px 4px;
+            font-size: 11px;
+        }
+        
+        /* Sidebar Active State */
+        .nav-link.active {
+            background-color: #F3F4F6;
+            color: #3E5C76;
+            font-weight: 600;
+            border-right: 3px solid #3E5C76;
+        }
+        
+        /* Emergency Link Active State */
+        .nav-link-danger.active {
+            background-color: #FEF2F2;
+            color: #DC2626;
+            font-weight: 600;
+            border-right: 3px solid #DC2626;
+        }
+
+        /* DARK MODE OVERRIDES */
+        body.dark-mode {
+            background-color: #111827; /* Tailwind gray-900 */
+            color: #f3f4f6;
+        }
+        body.dark-mode aside, 
+        body.dark-mode header, 
+        body.dark-mode .bg-white {
+            background-color: #1f2937 !important; /* Tailwind gray-800 */
+            border-color: #374151 !important; /* Tailwind gray-700 */
+            color: #f3f4f6 !important;
+        }
+        body.dark-mode .nav-link:hover {
+            background-color: #374151 !important;
+            color: #f3f4f6 !important;
+        }
+        body.dark-mode .nav-link.active {
+            background-color: #374151 !important;
+            color: #60a5fa !important; /* Blue-400 */
+            border-right-color: #60a5fa !important;
+        }
+        body.dark-mode .nav-link-danger:hover {
+             background-color: #374151 !important;
+        }
+        body.dark-mode .glass-card {
+            background: rgba(31, 41, 55, 0.95);
+            border-color: rgba(75, 85, 99, 0.5);
+            color: #e5e7eb;
+        }
+        body.dark-mode .text-gray-800, 
+        body.dark-mode .text-gray-700, 
+        body.dark-mode .text-gray-600 {
+            color: #e5e7eb !important;
+        }
+        body.dark-mode .text-gray-500,
+        body.dark-mode .text-gray-400 {
+            color: #9ca3af !important;
+        }
+        body.dark-mode .bg-gray-50, 
+        body.dark-mode .bg-gray-100 {
+            background-color: #111827 !important;
+            color: #d1d5db !important;
+            border-color: #374151 !important;
+        }
+        /* Dark Mode Table */
+        body.dark-mode .spreadsheet-container {
+            background-color: #1f2937;
+            border-color: #374151;
+        }
+        body.dark-mode .spreadsheet-table th {
+            background-color: #374151;
+            color: #f3f4f6;
+            border-color: #4b5563;
+        }
+        body.dark-mode .spreadsheet-table td {
+            border-color: #4b5563;
+            background-color: #1f2937;
+            color: #d1d5db;
+        }
+        body.dark-mode .spreadsheet-table tr:nth-child(even) {
+            background-color: #111827;
+        }
+        body.dark-mode .spreadsheet-table tr:hover {
+            background-color: #374151;
+        }
+
+        /* Toggle Button Transition */
+        .toggle-btn div {
+            transition: all 0.3s ease;
+        }
+        
+        /* Consultation Styles */
+        .diagnosis-card {
+            transition: all 0.3s ease;
+        }
+        .diagnosis-card.status-normal { border-left: 5px solid #10B981; }
+        .diagnosis-card.status-warning { border-left: 5px solid #F59E0B; }
+        .diagnosis-card.status-critical { border-left: 5px solid #EF4444; }
+    </style>
+</head>
+<body class="h-screen w-full flex flex-col items-center justify-center">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="w-full h-full flex items-center justify-center fixed z-50 bg-[#F4F4F6]">
+        <div class="glass-card p-10 w-96 text-center fade-in">
+            <div class="mb-6 flex justify-center text-accent-blue">
+                <i class="ph ph-heartbeat text-5xl text-[#3E5C76] heartbeat-icon"></i>
+            </div>
+            <h2 class="text-2xl font-light mb-2 tracking-wide text-gray-800">Vital Touch</h2>
+            <p class="text-sm text-gray-500 mb-8">Secure IoT Gateway</p>
+            
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div class="text-left">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Username</label>
+                    <input type="text" id="username" placeholder="Username" autocomplete="username" 
+                        class="w-full mt-1 p-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-[#3E5C76] transition">
+                </div>
+                <div class="text-left">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" 
+                        class="w-full mt-1 p-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:border-[#3E5C76] transition">
+                </div>
+                <button type="submit" 
+                    class="btn-luxury w-full bg-[#3E5C76] text-white p-3 rounded-lg mt-6 font-medium tracking-wide hover:bg-[#2c4255]">
+                    Enter Dashboard
+                </button>
+            </form>
+            <p id="login-error" class="text-red-500 text-xs mt-4 hidden">Invalid Credentials.</p>
+        </div>
+    </div>
+
+    <!-- APP CONTAINER -->
+    <div id="app-container" class="hidden w-full h-full flex overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between hidden md:flex">
+            <div>
+                <div class="h-20 flex items-center px-8 border-b border-gray-100">
+                    <i class="ph ph-pulse text-2xl text-[#3E5C76] mr-2"></i>
+                    <span class="font-semibold text-lg tracking-tight text-gray-700">Vital Touch</span>
+                </div>
+                <nav class="mt-8 px-0 space-y-1">
+                    <a href="#" onclick="showSection('dashboard')" id="nav-dashboard" class="nav-link active flex items-center px-8 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition">
+                        <i class="ph ph-squares-four text-xl mr-3"></i> Dashboard
+                    </a>
+                    <a href="#" onclick="showSection('consultation')" id="nav-consultation" class="nav-link flex items-center px-8 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition">
+                        <i class="ph ph-stethoscope text-xl mr-3"></i> Consultation
+                    </a>
+                    <a href="#" onclick="showSection('logs')" id="nav-logs" class="nav-link flex items-center px-8 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition">
+                        <i class="ph ph-file-xls text-xl mr-3"></i> SQL Logs
+                    </a>
+                    <a href="#" onclick="showSection('settings')" id="nav-settings" class="nav-link flex items-center px-8 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-800 transition">
+                        <i class="ph ph-gear text-xl mr-3"></i> Settings
+                    </a>
+                    
+                    <div class="pt-4 mt-4 border-t border-gray-100">
+                         <a href="#" onclick="showSection('emergency')" id="nav-emergency" class="nav-link-danger flex items-center px-8 py-3 text-red-500 hover:bg-red-50 hover:text-red-600 transition group">
+                            <i class="ph ph-siren text-xl mr-3 animate-pulse"></i> 
+                            <span class="font-bold">Emergency</span>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+            <div class="p-6">
+                <div class="bg-[#F4F4F6] rounded-xl p-4">
+                    <p class="text-xs text-gray-500 mb-1">System Status</p>
+                    <div class="flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+                        <span class="text-sm font-medium text-gray-700">Online</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden bg-[#F4F4F6]">
+            <!-- HEADER -->
+            <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 shrink-0">
+                <div>
+                    <h1 class="text-xl font-light text-gray-800">Patient Monitoring Console</h1>
+                    <p id="welcome-msg" class="text-xs text-[#3E5C76] font-medium mt-1">Welcome back...</p>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <!-- Data source indicator: live device / simulated / offline -->
+                    <div id="source-badge" class="text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-500">Waiting for data…</div>
+
+                    <!-- Polling Interval Selector -->
+                    <div class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
+                        <i class="ph ph-clock text-gray-400"></i>
+                        <span class="text-xs text-gray-500">Refresh:</span>
+                        <select id="update-rate" onchange="changeUpdateRate(this.value)" class="bg-transparent text-xs font-bold text-[#3E5C76] focus:outline-none cursor-pointer">
+                            <option value="2000">2s</option>
+                            <option value="3000" selected>3s</option>
+                            <option value="4000">4s</option>
+                            <option value="5000">5s</option>
+                            <option value="10000">10s</option>
+                            <option value="15000">15s</option>
+                        </select>
+                    </div>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="relative group cursor-pointer">
+                        <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition">
+                            <div class="w-10 h-10 rounded-full bg-[#3E5C76] flex items-center justify-center text-white font-bold" id="user-avatar">A</div>
+                            <div class="text-right hidden sm:block">
+                                <p class="text-sm font-medium text-gray-800" id="user-name-display">Admin</p>
+                                <p class="text-xs text-gray-400" id="user-role-display">Super Admin</p>
+                            </div>
+                            <i class="ph ph-caret-down text-gray-400"></i>
+                        </div>
+                        
+                        <div class="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
+                            <a href="#" onclick="showSection('settings')" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Profile & Settings</a>
+                            <div class="border-t border-gray-100"></div>
+                            <a href="#" onclick="logout()" class="block px-4 py-2 text-sm text-red-500 hover:bg-red-50">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- MAIN CONTENT AREA -->
+            <div class="flex-1 overflow-y-auto p-8 relative">
+                
+                <!-- VIEW 1: DASHBOARD -->
+                <div id="view-dashboard" class="space-y-8 fade-in">
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="glass-card p-6 flex flex-col justify-between border-l-4 border-[#C05746]">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-wider">Heart Rate</p>
+                                    <h3 class="text-3xl font-light mt-2" id="display-hr">-- <span class="text-sm text-gray-400">BPM</span></h3>
+                                </div>
+                                <div class="p-2 bg-red-50 rounded-lg text-[#C05746]">
+                                    <!-- Added class heartbeat-icon here -->
+                                    <i class="ph ph-heart text-xl heartbeat-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6 flex flex-col justify-between border-l-4 border-[#3E5C76]">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-wider">SpO2</p>
+                                    <h3 class="text-3xl font-light mt-2" id="display-spo2">-- <span class="text-sm text-gray-400">%</span></h3>
+                                </div>
+                                <div class="p-2 bg-blue-50 rounded-lg text-[#3E5C76]">
+                                    <i class="ph ph-drop text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6 flex flex-col justify-between border-l-4 border-[#6A8E7F]">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-wider">Temperature</p>
+                                    <h3 class="text-3xl font-light mt-2" id="display-temp">-- <span class="text-sm text-gray-400">°C</span></h3>
+                                </div>
+                                <div class="p-2 bg-green-50 rounded-lg text-[#6A8E7F]">
+                                    <i class="ph ph-thermometer text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6 flex flex-col justify-between border-l-4 border-yellow-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-wider">Status</p>
+                                    <h3 class="text-2xl font-light mt-2 text-yellow-600">Active</h3>
+                                </div>
+                                <div class="p-2 bg-yellow-50 rounded-lg text-yellow-600">
+                                    <i class="ph ph-activity text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Area -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="glass-card p-6 lg:col-span-2">
+                            <h4 class="text-sm font-semibold text-gray-600 mb-4">Heart Rate &amp; SpO2 History</h4>
+                            <div class="h-64">
+                                <canvas id="mainChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="glass-card p-6">
+                            <h4 class="text-sm font-semibold text-gray-600 mb-4">Sensor Health Distribution</h4>
+                            <div class="h-64 flex items-center justify-center">
+                                <canvas id="pieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: CONSULTATION (NEW) -->
+                <div id="view-consultation" class="hidden fade-in max-w-4xl mx-auto space-y-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-light text-gray-800">Automated Health Diagnosis</h2>
+                        <span class="text-xs font-mono bg-blue-100 text-blue-800 px-3 py-1 rounded-full">REAL-TIME ANALYSIS</span>
+                    </div>
+
+                    <div id="consultation-result-card" class="glass-card p-8 diagnosis-card status-normal shadow-lg">
+                        <div class="flex items-start gap-6">
+                            <div class="p-4 rounded-full bg-gray-50" id="diagnosis-icon-container">
+                                <i class="ph ph-check-circle text-4xl text-green-500" id="diagnosis-icon"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-gray-800 mb-2" id="diagnosis-title">Patient is Healthy</h3>
+                                <p class="text-gray-600 leading-relaxed mb-4" id="diagnosis-text">
+                                    All vital signs are currently within the standard physiological range. 
+                                    Heart rate, blood oxygen saturation, and body temperature show no anomalies.
+                                </p>
+                                
+                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Automated Recommendations</p>
+                                    <ul class="list-disc list-inside text-sm text-gray-700 space-y-1" id="diagnosis-recommendations">
+                                        <li>Continue routine monitoring.</li>
+                                        <li>No immediate medical intervention required.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Snapshot of data used for diagnosis -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="glass-card p-4 text-center">
+                            <p class="text-xs text-gray-400 uppercase">Analyzed HR</p>
+                            <p class="text-xl font-bold text-gray-800" id="consult-hr">--</p>
+                        </div>
+                        <div class="glass-card p-4 text-center">
+                            <p class="text-xs text-gray-400 uppercase">Analyzed SpO2</p>
+                            <p class="text-xl font-bold text-gray-800" id="consult-spo2">--</p>
+                        </div>
+                        <div class="glass-card p-4 text-center">
+                            <p class="text-xs text-gray-400 uppercase">Analyzed Temp</p>
+                            <p class="text-xl font-bold text-gray-800" id="consult-temp">--</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- VIEW 2.5: EMERGENCY (NEW) -->
+                <div id="view-emergency" class="hidden fade-in max-w-3xl mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8">
+                    
+                    <div class="space-y-2">
+                        <h2 class="text-3xl font-bold text-red-600">EMERGENCY RESPONSE CONSOLE</h2>
+                        <p class="text-gray-500">Only use this in case of critical patient failure.</p>
+                    </div>
+
+                    <button onclick="triggerEmergency()" class="btn-emergency w-48 h-48 rounded-full bg-red-600 text-white shadow-2xl flex flex-col items-center justify-center hover:bg-red-700 transition active:scale-95 cursor-pointer border-4 border-red-400">
+                        <i class="ph ph-warning-octagon text-5xl mb-2"></i>
+                        <span class="text-xl font-black tracking-widest">SOS</span>
+                        <span class="text-xs font-light mt-1">PRESS TO ALERT</span>
+                    </button>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-8">
+                        <div class="bg-white p-6 rounded-xl border border-red-100 shadow-sm text-left">
+                            <h4 class="text-red-800 font-bold mb-3 flex items-center"><i class="ph ph-phone mr-2"></i> Quick Contacts</h4>
+                            <ul class="space-y-3 text-sm">
+                                <li class="flex justify-between border-b border-gray-50 pb-2">
+                                    <span class="text-gray-600">Primary Physician</span>
+                                    <span class="font-mono font-bold text-gray-800">Not configured</span>
+                                </li>
+                                <li class="flex justify-between border-b border-gray-50 pb-2">
+                                    <span class="text-gray-600">Ambulance / Emergency (India)</span>
+                                    <span class="font-mono font-bold text-gray-800">108 / 112</span>
+                                </li>
+                                <li class="flex justify-between">
+                                    <span class="text-gray-600">Ward Nurse</span>
+                                    <span class="font-mono font-bold text-gray-800">Not configured</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-red-100 shadow-sm text-left">
+                             <h4 class="text-red-800 font-bold mb-3 flex items-center"><i class="ph ph-clock-counter-clockwise mr-2"></i> Event Log</h4>
+                             <div id="emergency-log" class="text-xs font-mono text-gray-500 h-24 overflow-y-auto">
+                                 <p>[SYSTEM] Ready for emergency protocol...</p>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- VIEW 3: SQL LOGS -->
+                <div id="view-logs" class="hidden fade-in h-full flex flex-col">
+                    <div class="flex justify-between items-end mb-4">
+                        <div>
+                            <h2 class="text-xl font-light text-gray-800">Database Logs</h2>
+                            <p class="text-sm text-gray-500">Raw sensor data stream (XLS View)</p>
+                        </div>
+                        <button onclick="exportCSV()" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 flex items-center gap-2 cursor-pointer transition">
+                            <i class="ph ph-microsoft-excel-logo"></i> Export .CSV
+                        </button>
+                    </div>
+                    
+                    <div class="spreadsheet-container rounded shadow-sm flex-1">
+                        <table class="spreadsheet-table" id="spreadsheet-table">
+                            <thead>
+                                <tr>
+                                    <th>A (ID)</th>
+                                    <th>B (TIMESTAMP)</th>
+                                    <th>C (HEART_RATE)</th>
+                                    <th>D (SPO2_LEVEL)</th>
+                                    <th>E (BODY_TEMP)</th>
+                                    <th>F (SOURCE)</th>
+                                    <th>G (STATUS_FLAG)</th>
+                                    <th>H (DEVICE_ID)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="excel-body">
+                                <!-- JS inserts rows here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- VIEW 4: SETTINGS -->
+                <div id="view-settings" class="hidden fade-in max-w-4xl mx-auto">
+                    <h2 class="text-2xl font-light text-gray-800 mb-6">System Settings</h2>
+                    
+                    <!-- About User Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-700">About User</h3>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold uppercase tracking-wider" id="setting-role-badge">Admin</span>
+                        </div>
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="flex items-center gap-4">
+                                <div class="w-20 h-20 rounded-full bg-[#3E5C76] flex items-center justify-center text-white text-3xl font-bold" id="setting-avatar">
+                                    H
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500 uppercase tracking-wide">Display Name</p>
+                                    <p class="text-xl font-medium text-gray-800" id="setting-name">Hakash</p>
+                                    <p class="text-sm text-gray-400 mt-1">ID: <span class="font-mono">USER_8829</span></p>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-sm text-gray-500 uppercase tracking-wide">Session Info</p>
+                                    <div class="flex justify-between items-center mt-2 border-b border-gray-100 pb-2">
+                                        <span class="text-gray-600">Login Time:</span>
+                                        <span class="font-mono text-gray-800" id="login-time-display">--:--:--</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <span class="text-gray-600">Access Level:</span>
+                                        <span class="text-green-600 font-medium">Read / Write</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appearance & Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h3 class="font-semibold text-gray-700 mb-4">Theme & Appearance</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Dark Mode</span>
+                                    <button onclick="toggleDarkMode()" id="btn-dark-mode" class="toggle-btn w-12 h-6 bg-gray-200 rounded-full relative transition duration-300 focus:outline-none cursor-pointer">
+                                        <div class="w-4 h-4 bg-white rounded-full absolute left-1 top-1 shadow-sm transition transform"></div>
+                                    </button>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Compact Table View</span>
+                                    <button onclick="toggleCompactMode()" id="btn-compact-mode" class="toggle-btn w-12 h-6 bg-gray-200 rounded-full relative transition duration-300 focus:outline-none cursor-pointer">
+                                        <div class="w-4 h-4 bg-white rounded-full absolute left-1 top-1 shadow-sm transition transform"></div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h3 class="font-semibold text-gray-700 mb-4">Application Details</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Version</span>
+                                    <span class="text-gray-800">v2.6.0 (Emergency Added)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Build</span>
+                                    <span class="text-gray-800 font-mono">20231024-RC3</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Server</span>
+                                    <span class="text-gray-800">AWS-AP-SOUTH-1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Vital Touch dashboard. All data comes from the Flask backend (backend/app.py);
+        // nothing is generated in the browser.
+
+        // --- STATE MANAGEMENT ---
+        const state = {
+            currentUser: null,
+            loginTime: null,
+            updateIntervalMs: 3000,
+            intervalId: null,
+            lastId: 0,
+            lastReadingAt: null,
+            isDarkMode: false,
+            isCompactMode: false
+        };
+        const STALE_AFTER_MS = 30000;
+
+        // --- 1. SETTINGS & TOGGLES ---
+        function toggleDarkMode() {
+            state.isDarkMode = !state.isDarkMode;
+            const btn = document.getElementById('btn-dark-mode');
+            const toggleDot = btn.firstElementChild;
+
+            if (state.isDarkMode) {
+                document.body.classList.add('dark-mode');
+                btn.classList.remove('bg-gray-200');
+                btn.classList.add('bg-[#3E5C76]');
+                toggleDot.style.transform = 'translateX(24px)';
+            } else {
+                document.body.classList.remove('dark-mode');
+                btn.classList.add('bg-gray-200');
+                btn.classList.remove('bg-[#3E5C76]');
+                toggleDot.style.transform = 'translateX(0)';
+            }
+        }
+
+        function toggleCompactMode() {
+            state.isCompactMode = !state.isCompactMode;
+            const btn = document.getElementById('btn-compact-mode');
+            const toggleDot = btn.firstElementChild;
+            const table = document.getElementById('spreadsheet-table');
+
+            if (state.isCompactMode) {
+                table.classList.add('compact-view');
+                btn.classList.remove('bg-gray-200');
+                btn.classList.add('bg-[#3E5C76]');
+                toggleDot.style.transform = 'translateX(24px)';
+            } else {
+                table.classList.remove('compact-view');
+                btn.classList.add('bg-gray-200');
+                btn.classList.remove('bg-[#3E5C76]');
+                toggleDot.style.transform = 'translateX(0)';
+            }
+        }
+        
+        // --- 1.5 EMERGENCY LOGIC ---
+        async function triggerEmergency() {
+            const log = document.getElementById('emergency-log');
+            const p = document.createElement('p');
+            const time = new Date().toLocaleTimeString();
+            try {
+                const res = await fetch('/api/sos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ message: 'SOS raised from dashboard' })
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const ev = await res.json();
+                p.innerText = `[${time}] SOS event #${ev.id} recorded on server.`;
+                p.classList.add("text-red-600", "font-bold");
+            } catch (err) {
+                p.innerText = `[${time}] Could not record SOS: backend unreachable.`;
+                p.classList.add("text-gray-700", "font-bold");
+            }
+            log.prepend(p);
+            alert("SOS recorded.\n\nThis prototype does not contact emergency services automatically. Call 108 (ambulance) or 112 if needed.");
+        }
+
+        // --- 2. EXPORT CSV ---
+        function exportCSV() {
+            let csv = [];
+            const rows = document.querySelectorAll("#spreadsheet-table tr");
+            
+            for (let i = 0; i < rows.length; i++) {
+                let row = [], cols = rows[i].querySelectorAll("td, th");
+                
+                for (let j = 0; j < cols.length; j++) 
+                    row.push('"' + cols[j].innerText + '"');
+                
+                csv.push(row.join(","));        
+            }
+
+            downloadCSV(csv.join("\n"), "vital_touch_logs.csv");
+        }
+
+        function downloadCSV(csv, filename) {
+            let csvFile;
+            let downloadLink;
+
+            // CSV file
+            csvFile = new Blob([csv], {type: "text/csv"});
+
+            // Download link
+            downloadLink = document.createElement("a");
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
+
+        // --- 3. NAVIGATION & VIEWS ---
+        function showSection(sectionId) {
+            // Hide all views
+            const views = ['dashboard', 'consultation', 'logs', 'settings', 'emergency'];
+            views.forEach(v => {
+                const el = document.getElementById('view-' + v);
+                if(el) el.classList.add('hidden');
+                
+                // Reset Navs
+                const nav = document.getElementById('nav-' + v);
+                if(nav) {
+                    nav.classList.remove('active');
+                    // Special reset for emergency button
+                    if(v === 'emergency') nav.classList.remove('active', 'bg-red-50');
+                }
+            });
+
+            // Show selected view
+            document.getElementById('view-' + sectionId).classList.remove('hidden');
+            
+            // Highlight nav
+            const navLink = document.getElementById('nav-' + sectionId);
+            if(navLink) {
+                if(sectionId === 'emergency') {
+                    navLink.classList.add('active'); // CSS handles red styling
+                } else {
+                    navLink.classList.add('active');
+                }
+            }
+        }
+
+        // --- 4. LOGIN LOGIC (server-side authentication) ---
+        async function handleLogin(e) {
+            e.preventDefault();
+            const errorMsg = document.getElementById('login-error');
+            errorMsg.classList.add('hidden');
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+                const body = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    errorMsg.innerText = body.error || "Invalid credentials.";
+                    errorMsg.classList.remove('hidden');
+                    return;
+                }
+                enterApp(body);
+            } catch (err) {
+                errorMsg.innerText = "Cannot reach the Vital Touch backend. Is backend/app.py running?";
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        function enterApp(user) {
+            state.currentUser = {
+                name: user.name,
+                role: user.role,
+                avatar: (user.name || '?').charAt(0).toUpperCase()
+            };
+            state.loginTime = new Date().toLocaleTimeString();
+            updateUserInterface();
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('fade-in');
+
+            changeUpdateRate(state.updateIntervalMs);
+        }
+
+        function updateUserInterface() {
+            const user = state.currentUser;
+
+            // Header
+            document.getElementById('welcome-msg').innerText = `Welcome back, ${user.name}`;
+            document.getElementById('user-name-display').innerText = user.name;
+            document.getElementById('user-role-display').innerText = user.role;
+            document.getElementById('user-avatar').innerText = user.avatar;
+
+            // Settings Page
+            document.getElementById('setting-name').innerText = user.name;
+            document.getElementById('setting-role-badge').innerText = user.role;
+            document.getElementById('setting-avatar').innerText = user.avatar;
+            document.getElementById('login-time-display').innerText = state.loginTime;
+        }
+
+        async function logout() {
+            clearInterval(state.intervalId);
+            try {
+                await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
+            } catch (err) { /* reload anyway */ }
+            location.reload();
+        }
+
+        // --- 5. LIVE DATA (polls the backend) ---
+        function fmt(value, unit) {
+            return (value === null || value === undefined) ? '--' : `${value}${unit || ''}`;
+        }
+
+        function toUiReading(r) {
+            return {
+                id: r.id,
+                time: new Date(r.created_at).toLocaleTimeString(),
+                createdAt: Date.parse(r.created_at),
+                hr: r.heart_rate,
+                spo2: r.spo2,
+                temp: r.temperature,
+                status: r.status,
+                issues: r.issues,
+                source: r.source,
+                device: r.device_id
+            };
+        }
+
+        function setSourceBadge(text, classes) {
+            const badge = document.getElementById('source-badge');
+            badge.className = 'text-xs font-bold px-3 py-1.5 rounded-lg border ' + classes;
+            badge.innerText = text;
+        }
+
+        function changeUpdateRate(ms) {
+            state.updateIntervalMs = parseInt(ms);
+            if (state.intervalId) clearInterval(state.intervalId);
+            pollReadings();
+            state.intervalId = setInterval(pollReadings, state.updateIntervalMs);
+        }
+
+        async function pollReadings() {
+            try {
+                const res = await fetch(`/api/readings?after_id=${state.lastId}&limit=50`, { credentials: 'same-origin' });
+                if (res.status === 401) { location.reload(); return; }
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const body = await res.json();
+                body.readings.forEach(r => renderReading(toUiReading(r)));
+
+                if (state.lastReadingAt === null) {
+                    setSourceBadge('No data yet', 'bg-gray-50 text-gray-500 border-gray-200');
+                } else if (body.readings.length === 0 && Date.now() - state.lastReadingAt > STALE_AFTER_MS) {
+                    setSourceBadge('No new data: device idle?', 'bg-yellow-50 text-yellow-700 border-yellow-200');
+                }
+            } catch (err) {
+                setSourceBadge('Backend offline', 'bg-red-50 text-red-700 border-red-200');
+            }
+        }
+
+        function renderReading(data) {
+            state.lastId = Math.max(state.lastId, data.id);
+            state.lastReadingAt = data.createdAt;
+
+            document.getElementById('display-hr').innerHTML = `${fmt(data.hr)} <span class="text-sm text-gray-400">BPM</span>`;
+            document.getElementById('display-spo2').innerHTML = `${fmt(data.spo2)} <span class="text-sm text-gray-400">%</span>`;
+            document.getElementById('display-temp').innerHTML = `${fmt(data.temp)} <span class="text-sm text-gray-400">°C</span>`;
+
+            if (data.source === 'device') {
+                setSourceBadge(`Live device: ${data.device}`, 'bg-green-50 text-green-700 border-green-200');
+            } else {
+                setSourceBadge('Simulated data (demo mode)', 'bg-yellow-50 text-yellow-700 border-yellow-200');
+            }
+
+            updateChart(data);
+            addLogEntry(data);
+            updateConsultationUI(data);
+        }
+
+        // --- 6. EXCEL TABLE LOGIC ---
+        function addLogEntry(data) {
+            const tbody = document.getElementById('excel-body');
+            const row = document.createElement('tr');
+
+            // Status is computed on the server (backend/alerts.py)
+            const status = (data.status || 'normal').toUpperCase();
+            let rowColor = "";
+            if (status === "WARNING") {
+                rowColor = state.isDarkMode ? "bg-yellow-900 text-yellow-200" : "bg-yellow-50 text-yellow-700";
+            } else if (status === "CRITICAL") {
+                rowColor = state.isDarkMode ? "bg-red-900 text-red-200" : "bg-red-50 text-red-700";
+            }
+
+            row.innerHTML = `
+                <td class="text-center bg-gray-50 text-gray-500">${data.id}</td>
+                <td>${data.time}</td>
+                <td class="text-right font-bold">${fmt(data.hr)}</td>
+                <td class="text-right">${fmt(data.spo2, '%')}</td>
+                <td class="text-right">${fmt(data.temp)}</td>
+                <td class="text-right text-xs text-gray-500">${data.source}</td>
+                <td class="text-center font-bold text-xs ${rowColor}">${status}</td>
+                <td class="text-center text-xs">${data.device}</td>
+            `;
+
+            // Insert at top
+            tbody.insertBefore(row, tbody.firstChild);
+
+            // Limit rows to 50 for performance
+            if (tbody.children.length > 50) {
+                tbody.removeChild(tbody.lastChild);
+            }
+        }
+
+        // --- 7. CONSULTATION LOGIC (PROGRAMMATIC) ---
+        function updateConsultationUI(data) {
+            document.getElementById('consult-hr').innerText = data.hr + " BPM";
+            document.getElementById('consult-spo2').innerText = data.spo2 + " %";
+            document.getElementById('consult-temp').innerText = fmt(data.temp, " °C");
+
+            let issues = [];
+            let recommendations = [];
+            let statusLevel = "normal"; // normal, warning, critical
+
+            // HR Logic
+            if (data.hr > 100) {
+                issues.push("Tachycardia detected (High Heart Rate)");
+                recommendations.push("Patient should sit or lie down.");
+                recommendations.push("Check hydration and stress levels.");
+                statusLevel = "warning";
+            } else if (data.hr < 60) {
+                issues.push("Bradycardia detected (Low Heart Rate)");
+                recommendations.push("Monitor for dizziness or fatigue.");
+                statusLevel = "warning";
+            }
+
+            // SpO2 Logic
+            if (data.spo2 < 95) {
+                issues.push("Hypoxia Risk (Low Oxygen)");
+                recommendations.push("Check airway and breathing.");
+                recommendations.push("Consider supplemental oxygen if persistent.");
+                if (data.spo2 < 90) statusLevel = "critical";
+                else if (statusLevel !== "critical") statusLevel = "warning";
+            }
+
+            // Temp Logic
+            const hasTemp = data.temp !== null && data.temp !== undefined;
+            if (hasTemp && data.temp > 37.5) {
+                issues.push("Elevated Temperature (Fever)");
+                recommendations.push("Hydrate and rest.");
+                if (statusLevel !== "critical") statusLevel = "warning";
+            } else if (hasTemp && data.temp < 35.0) {
+                issues.push("Hypothermia Risk");
+                recommendations.push("Keep patient warm.");
+                statusLevel = "critical";
+            }
+
+            // UI Elements
+            const card = document.getElementById('consultation-result-card');
+            const icon = document.getElementById('diagnosis-icon');
+            const title = document.getElementById('diagnosis-title');
+            const text = document.getElementById('diagnosis-text');
+            const recList = document.getElementById('diagnosis-recommendations');
+
+            // Reset Classes
+            card.classList.remove('status-normal', 'status-warning', 'status-critical');
+            icon.classList.remove('text-green-500', 'text-yellow-500', 'text-red-500', 'ph-check-circle', 'ph-warning', 'ph-siren');
+
+            // Apply State
+            if (issues.length === 0) {
+                // NORMAL
+                card.classList.add('status-normal');
+                icon.classList.add('ph-check-circle', 'text-green-500');
+                title.innerText = "Patient is Healthy";
+                title.className = "text-xl font-bold text-gray-800 mb-2"; // Reset color
+                text.innerText = "All measured vital signs are within the standard screening range. This is a monitoring aid, not a medical diagnosis.";
+                
+                recList.innerHTML = `
+                    <li>Continue routine monitoring.</li>
+                    <li>No immediate medical intervention required.</li>
+                `;
+            } else {
+                // ABNORMAL
+                if (statusLevel === "critical") {
+                    card.classList.add('status-critical');
+                    icon.classList.add('ph-siren', 'text-red-500');
+                    title.innerText = "Critical Attention Needed";
+                    title.className = "text-xl font-bold text-red-600 mb-2";
+                } else {
+                    card.classList.add('status-warning');
+                    icon.classList.add('ph-warning', 'text-yellow-500');
+                    title.innerText = "Health Warning Detected";
+                    title.className = "text-xl font-bold text-yellow-700 mb-2";
+                }
+
+                text.innerText = `The system has detected the following anomalies: ${issues.join(", ")}. Please review the patient condition immediately.`;
+
+                // Build Recommendations List
+                recList.innerHTML = "";
+                recommendations.forEach(rec => {
+                    const li = document.createElement('li');
+                    li.innerText = rec;
+                    recList.appendChild(li);
+                });
+                const li = document.createElement('li');
+                li.innerText = "Consult a physician for further evaluation.";
+                li.classList.add("font-semibold");
+                recList.appendChild(li);
+            }
+        }
+
+        // --- 8. CHART LOGIC ---
+        let mainChart, pieChart;
+        const maxDataPoints = 20;
+
+        function initCharts() {
+            const ctxMain = document.getElementById('mainChart').getContext('2d');
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+
+            mainChart = new Chart(ctxMain, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Heart Rate',
+                        data: [],
+                        borderColor: '#C05746',
+                        backgroundColor: 'rgba(192, 87, 70, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 2
+                    }, {
+                        label: 'SpO2',
+                        data: [],
+                        borderColor: '#3E5C76',
+                        borderDash: [5, 5],
+                        tension: 0.1,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false, // Disable animation for smoother real-time updates
+                    plugins: { legend: { position: 'top' } },
+                    scales: { y: { beginAtZero: false, min: 50, max: 120 } }
+                }
+            });
+
+            pieChart = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Normal', 'Check', 'Crit'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#6A8E7F', '#EAB308', '#C05746'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, cutout: '75%', plugins: { legend: { position: 'right' } } }
+            });
+        }
+
+        function updateChart(data) {
+            if (!mainChart) return;
+            
+            if (mainChart.data.labels.length > maxDataPoints) {
+                mainChart.data.labels.shift();
+                mainChart.data.datasets[0].data.shift();
+                mainChart.data.datasets[1].data.shift();
+            }
+            mainChart.data.labels.push(data.time);
+            mainChart.data.datasets[0].data.push(data.hr);
+            mainChart.data.datasets[1].data.push(data.spo2);
+            mainChart.update();
+
+            // Status distribution of all readings received this session
+            const idx = { normal: 0, warning: 1, critical: 2 }[data.status];
+            if (pieChart && idx !== undefined) {
+                pieChart.data.datasets[0].data[idx] += 1;
+                pieChart.update();
+            }
+        }
+
+        // --- 9. INITIALISE ---
+        window.onload = async function() {
+            try {
+                initCharts();
+            } catch (err) {
+                // Chart.js loads from a CDN; without internet the dashboard still works without charts
+                console.warn('Charts unavailable:', err);
+            }
+            // Resume an existing session after a page refresh
+            try {
+                const res = await fetch('/api/me', { credentials: 'same-origin' });
+                if (res.ok) enterApp(await res.json());
+            } catch (err) { /* backend not reachable: stay on login screen */ }
+        };
+
+    </script>
+</body>
+</html>

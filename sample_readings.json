@@ -1,0 +1,112 @@
+[
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 72,
+    "spo2": 98
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 74,
+    "spo2": 97
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 76,
+    "spo2": 98
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 79,
+    "spo2": 97
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 88,
+    "spo2": 96
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 104,
+    "spo2": 97
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 112,
+    "spo2": 96
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 95,
+    "spo2": 95
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 78,
+    "spo2": 93
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 80,
+    "spo2": 89
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 77,
+    "spo2": 97,
+    "temperature": 36.8
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 81,
+    "spo2": 98,
+    "temperature": 37.0
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 84,
+    "spo2": 97,
+    "temperature": 37.9
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 90,
+    "spo2": 96,
+    "temperature": 38.3
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 58,
+    "spo2": 97,
+    "temperature": 36.5
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 55,
+    "spo2": 98,
+    "temperature": 36.6
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 73,
+    "spo2": 98,
+    "temperature": 34.6
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 70,
+    "spo2": 99,
+    "temperature": 36.7
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 76,
+    "spo2": 98,
+    "temperature": 36.9
+  },
+  {
+    "device_id": "ESP32_01",
+    "heart_rate": 118,
+    "spo2": 87,
+    "temperature": 38.1
+  }
+]

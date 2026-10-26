@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.db
+.env
+backend/.env
+firmware/vital_touch_esp32/config.h
+.venv/
